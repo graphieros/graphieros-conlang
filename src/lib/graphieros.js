@@ -4599,22 +4599,89 @@ function linear({
             .replaceAll(",", " ");
     };
 
-    const populateGlyphPaths = (glyphPathsArray, meta) => {
-        return glyphPathsArray
-            .map((pathPoints) => {
-                return `
-                    <path
-                        class="glyph"
-                        data-glyph="${meta.glyph || ""}"
-                        data-glyph-instance="${meta.instanceId || ""}"
-                        data-line="${meta.line ?? ""}"
-                        data-word="${meta.word ?? ""}"
-                        d="M ${pathPoints}"
-                    />
-                `;
-            })
-            .join(" ");
+    const computeBBoxFromPaths = (glyphPathsArray) => {
+        let minX = Infinity;
+        let minY = Infinity;
+        let maxX = -Infinity;
+        let maxY = -Infinity;
+
+        glyphPathsArray.forEach((pathPoints) => {
+            for (let i = 0; i < pathPoints.length; i += 2) {
+                const x = Number(pathPoints[i]);
+                const y = Number(pathPoints[i + 1]);
+                if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+
+                if (x < minX) minX = x;
+                if (y < minY) minY = y;
+                if (x > maxX) maxX = x;
+                if (y > maxY) maxY = y;
+            }
+        });
+
+        if (!Number.isFinite(minX) || !Number.isFinite(minY) || !Number.isFinite(maxX) || !Number.isFinite(maxY)) {
+            return { minX: 0, minY: 0, maxX: 1, maxY: 1 };
+        }
+
+        return { minX, minY, maxX, maxY };
     };
+
+    const hexPathAroundRect = ({ minX, minY, maxX, maxY }, padding = 18) => {
+        const x0 = minX - padding;
+        const y0 = minY - padding;
+        const x1 = maxX + padding;
+        const y1 = maxY + padding;
+
+        const w = x1 - x0;
+        const h = y1 - y0;
+        const cx = x0 + w / 2;
+        const cy = y0 + h / 2;
+        const hw = w / 2;
+        const hh = h / 2;
+
+        const p0 = [cx - hw, cy]; // L
+        const p1 = [cx - hw / 2, cy - hh]; // TL
+        const p2 = [cx + hw / 2, cy - hh]; // TR
+        const p3 = [cx + hw, cy]; // R
+        const p4 = [cx + hw / 2, cy + hh]; // BR
+        const p5 = [cx - hw / 2, cy + hh]; // BL
+
+        return `M ${p0[0]} ${p0[1]} L ${p1[0]} ${p1[1]} L ${p2[0]} ${p2[1]} L ${p3[0]} ${p3[1]} L ${p4[0]} ${p4[1]} L ${p5[0]} ${p5[1]} Z`;
+    };
+
+const populateGlyphPaths = (glyphPathsArray, meta) => {
+    const bbox = computeBBoxFromPaths(glyphPathsArray);
+    const hitD = hexPathAroundRect(bbox, 22);
+
+    const hitArea = `
+        <path
+            class="hit-area"
+            data-glyph="${meta.glyph || ""}"
+            data-glyph-instance="${meta.instanceId || ""}"
+            data-line="${meta.line ?? ""}"
+            data-word="${meta.word ?? ""}"
+            d="${hitD}"
+            fill="transparent"
+            stroke="none"
+        />
+    `;
+
+    const glyphStrokes = glyphPathsArray
+        .map((pathPoints) => {
+            return `
+                <path
+                    class="glyph"
+                    data-glyph="${meta.glyph || ""}"
+                    data-glyph-instance="${meta.instanceId || ""}"
+                    data-line="${meta.line ?? ""}"
+                    data-word="${meta.word ?? ""}"
+                    d="M ${pathPoints}"
+                />
+            `;
+        })
+        .join(" ");
+
+    return `${hitArea} ${glyphStrokes}`;
+};
 
     const getWordCountAndLength = (value) => {
         const output = [];

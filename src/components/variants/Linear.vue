@@ -43,6 +43,13 @@ function applyActiveClass() {
         const isActive = props.activeGlyphInstanceId && instanceId === props.activeGlyphInstanceId;
         path.classList.toggle("is-active-glyph", Boolean(isActive));
     });
+
+    const hits = el.querySelectorAll("path.hit-area");
+    hits.forEach((hit) => {
+        const instanceId = hit.dataset?.glyphInstance;
+        const isActive = props.activeGlyphInstanceId && instanceId === props.activeGlyphInstanceId;
+        hit.classList.toggle("is-active-glyph", Boolean(isActive));
+    });
 }
 
 function onPointerOver(event) {
@@ -94,11 +101,17 @@ watch(
 <style scoped>
 :deep(path.glyph.is-active-glyph) {
     filter: brightness(1.2);
-    stroke-width: 14;
+    stroke-width: 12;
     stroke: #bf6d4d;
 }
 :deep(path) {
     transition: all 0.2s;
+}
+:deep(path.hit-area) {
+    transition: fill 0.2s;
+}
+:deep(path.hit-area.is-active-glyph) {
+    fill:#4b576020;
 }
 svg {
     width: 100%;

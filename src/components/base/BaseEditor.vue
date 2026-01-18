@@ -401,7 +401,7 @@ const suggestionsWithHighlights = computed(() => {
                     <div
                         v-for="token in tokens"
                         :key="token.instanceId"
-                        class="translation-token flex flex-col"
+                        class="translation-token flex flex-row"
                         :class="[
                             token.isSection ? 'token-section' : '',
                             token.instanceId === activeGlyphInstanceId ? 'is-active' : ''
@@ -409,8 +409,15 @@ const suggestionsWithHighlights = computed(() => {
                         @mouseenter="activeGlyphInstanceId = token.instanceId"
                         @mouseleave="activeGlyphInstanceId = null"
                     >
-                        <span class="text-[#4b5760]">{{ token.labelEn }}</span>
-                        <span class="text-[#6e787f]">{{ token.labelFr }}</span>
+                        <div class="text-[#4b5760] pr-2 border-r border-[#9ea4a9]" style="display: flex; align-items:center;justify-content:center;">
+                            <code style="font-weight:bold">
+                                {{ token.glyphName.replace('_', '') }}
+                            </code>
+                        </div>
+                        <div class="flex flex-col pl-2">
+                            <span class="text-[#4b5760]">{{ token.labelEn }}</span>
+                            <span class="text-[#6e787f]">{{ token.labelFr }}</span>
+                        </div>
                     </div>
                 </span>
             </div>
@@ -433,8 +440,6 @@ const suggestionsWithHighlights = computed(() => {
 }
 
 .translation-token.is-active {
-    outline: 2px solid currentColor;
-    transform: translateY(-1px);
     border: 2px solid #bf6d4d;
 }
 

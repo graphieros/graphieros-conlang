@@ -1,6 +1,6 @@
 <script setup>
 import { computed, unref } from "vue";
-import { VueUiIcon } from "vue-data-ui";
+import { VueUiIcon } from "vue-data-ui/vue-ui-icon";
 import "vue-data-ui/style.css";
 
 const props = defineProps({
