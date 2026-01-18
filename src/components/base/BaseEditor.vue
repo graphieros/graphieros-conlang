@@ -429,11 +429,13 @@ const suggestionsWithHighlights = computed(() => {
     user-select: none;
     line-height: 0.8rem;
     border-radius: 1rem;
+    border: 2px solid white;
 }
 
 .translation-token.is-active {
     outline: 2px solid currentColor;
     transform: translateY(-1px);
+    border: 2px solid #bf6d4d;
 }
 
 .token-section::before {
